@@ -38,8 +38,8 @@ body {
 
         input {
             font-size: 20px;
-            color: #26A69A;
-            background-color: rgba(96, 96, 96, 0.5);
+            color: #51b2ff;
+            background-color: rgba(255, 255, 255, 0.2);
         }
 
         label {
@@ -64,6 +64,9 @@ body {
     position: absolute;
     top: 15px;
     right: 30px;
+    padding: 7px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
 
     img {
         width: 44px;
