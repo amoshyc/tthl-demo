@@ -11,36 +11,47 @@ import tensorflow as tf
 class Video(object):
     def __init__(self,
                  output_path='./static/hl.mp4',
+                 video_path='./static/v30.mp4',
                  frame_dir='./static/frames/',
-                 start_time='00:00:00',
+                 start_time='00:00:11',
                  duration='00:00:30',
                  fps=1):
         self.input_path = None
+        self.video_path = pathlib.Path(video_path)
         self.output_path = pathlib.Path(output_path)
         self.frame_dir = pathlib.Path(frame_dir)
         self.start_time = start_time
         self.duration = duration
         self.fps = fps
 
-    def __get_input_path(self, url):
+    def __get_input(self, url):
         # download if it's a web url
         if url.startswith('https://') or url.startswith('http://'):
-            self.input_path = pathlib.Path('./video.mp4')
+            self.input_path = pathlib.Path('./raw.mp4')
             if self.input_path.exists():
                 self.input_path.unlink()
-            cmd = f'youtube-dl -f "best[height<=480]" -o {self.input_path} {url}'
+            cmd = f'youtube-dl -f "best[height<=360]" --no-playlist -o "{self.input_path}" "{url}"'
             subprocess.check_output(cmd, shell=True)
         else:
             self.input_path = pathlib.Path(url)
 
-    def __write_frames(self):
-        # ffmpeg -i out.mp4 -ss 00:00:00 -t duration -vf fps="fps=1" outfile
+    def __gen_video(self):
+        # ffmpeg -i input.mp4 -ss 00:00:00 -t duration outfile
+        if self.video_path.exists():
+            self.video_path.unlink()
+        cmd = 'ffmpeg -i "{}" -ss {} -t {} -loglevel panic -hide_banner "{}"'.format(
+            self.input_path, self.start_time, self.duration, self.video_path)
+        print(cmd)
+        subprocess.run(cmd, shell=True)
+
+        # ffmpeg -i input.mp4 -ss 00:00:00 -t duration -vf fps="fps=1" outfile
         if self.frame_dir.exists():
             shutil.rmtree(str(self.frame_dir))
         self.frame_dir.mkdir(parents=True, exist_ok=True)
-        cmd = 'ffmpeg -i {} -ss {} -t {} -vf fps="fps={}" {} -loglevel panic -hide_banner'.format(
+        cmd = 'ffmpeg -i "{}" -ss {} -t {} -vf fps="fps={}" -loglevel panic -hide_banner "{}"'.format(
             self.input_path, self.start_time, self.duration, self.fps,
             self.frame_dir / '%05d.jpg')
+        print(cmd)
         subprocess.run(cmd, shell=True)
 
     def __load_frames(self):
@@ -54,16 +65,17 @@ class Video(object):
 
     def __predict(self, xs):
         n_samples = xs.shape[0]
-        model = tf.keras.models.load_model('models/vgg16_0.846_29.h5')
-        pred = model.predict(xs, batch_size=15, verbose=1)
-        pred = np.round(pred).astype(np.uint8).ravel()
+        model = tf.keras.models.load_model('models/vgg16_0.847_09.h5')
+        pred = model.predict(xs, batch_size=15, verbose=1).flatten()
+        print(pred)
+        pred = np.round(pred).astype(np.uint8)
         print(pred)
 
-        itv = 6
-        for i in range(n_samples - itv):
-            s, t = i, i + itv
-            if pred[s] == 1 and pred[t - 1] == 1:
-                pred[s:t] = 1
+        for itv in range(2, 6):
+            for i in range(n_samples - itv):
+                s, t = i, i + itv
+                if pred[s] == 1 and pred[t - 1] > 0:
+                    pred[s:t] = 1
         print(pred)
 
         ss, ee = [], []
@@ -92,30 +104,31 @@ class Video(object):
         # [0:v]trim=10:20,setpts=PTS-STARTPTS[v1]; \
         # [0:a]atrim=10:20,asetpts=PTS-STARTPTS[a1]; \
         # [v0][a0][v1][a1]concat=n=2:v=1:a=1[outv][outa]" -map [outv] -map [outa] out.mp4
+        # https://ffmpeg.org/ffmpeg-filters.html#concat
         n_segments = len(ss)
         trims = ''.join([
-            f'[0:v]trim={ss[i]}:{ee[i] + 0.5},setpts=PTS-STARTPTS[v{i}];' + \
-            f'[0:a]atrim={ss[i]}:{ee[i] + 0.5},asetpts=PTS-STARTPTS[a{i}];'
+            f'[0:v]trim={ss[i]}:{ee[i] + 0.3},setpts=PTS-STARTPTS[v{i}];' + \
+            f'[0:a]atrim={ss[i]}:{ee[i] + 0.3},asetpts=PTS-STARTPTS[a{i}];'
             for i in range(n_segments)
         ])
         concat = \
             ''.join([f'[v{i}][a{i}]' for i in range(n_segments)]) + \
             f'concat=n={n_segments}:v=1:a=1[outv][outa]'
         cmd = \
-            f'ffmpeg -y -i {self.input_path} -filter_complex "{trims}{concat}" -map [outv] -map [outa] "{self.output_path}" -loglevel panic -hide_banner'
+            f'ffmpeg -y -i "{self.video_path}" -filter_complex "{trims}{concat}" -loglevel panic -hide_banner -map [outv] -map [outa] "{self.output_path}"'
         print(cmd)
         subprocess.run(cmd, shell=True)
 
     def highlight(self, url):
         print('*' * 50)
-        print('Downloading')
+        print('Getting Input')
         print('*' * 50)
-        self.__get_input_path(url)
+        self.__get_input(url)
 
         print('*' * 50)
         print('Writing Frames')
         print('*' * 50)
-        self.__write_frames()
+        self.__gen_video()
 
         print('*' * 50)
         print('Loading Frames')
@@ -134,6 +147,7 @@ class Video(object):
 
 
 if __name__ == '__main__':
-    Video().highlight(
-        'https://www.youtube.com/watch?v=VLe_FKIl9qY&list=PLVAOVDY2mEaH3ovJDmWw2-su5gR6AKpiS&t=23s&index=2'
-    )
+    # Video().highlight(
+    #     'https://www.youtube.com/watch?v=SLJHRfudk6Q&index=2&list=PLVAOVDY2mEaEh8KT3TzYL_8or7yX80Ce7'
+    # )
+    Video().highlight('./raw.mp4')
