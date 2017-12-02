@@ -18,16 +18,13 @@ body {
     background-blend-mode: multiply;
 }
 
-#sec1, #sec3 {
-    background-color: #444;
-}
-
-#sec2, #sec4 {
-    background-color: #eee;
-}
-
 #sec1 {
+    background-color: #444;
     background-image: url('bg1.min.jpg');
+}
+
+#sec2 {
+    background-color: #eee;
 }
 
 #input {
@@ -87,6 +84,16 @@ body {
             }
         }
     }
+}
+
+#loading {
+    margin: auto;
+    display: none;
+}
+
+#result {
+    margin: auto;
+    display: none;
 }
 
 #nav {

@@ -23,6 +23,7 @@
 
 <body>
 
+    <!-- input section -->
     <section id="sec1" class="bg-image">
         <div id="input">
             <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
@@ -31,11 +32,11 @@
                     Youtube URL or Local Path
                 </label>
             </div>
-            <button id="fc" class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
-                <i class="material-icons">video_library</i>
+            <button id="submit" class="mdl-button mdl-js-button mdl-button--icon mdl-button--colored">
+                <i class="material-icons">send</i>
             </button>
-            <div class="mdl-tooltip" for="fc">
-                Choose File From Local
+            <div class="mdl-tooltip" for="submit">
+                Submit
             </div>
         </div>
 
@@ -49,20 +50,23 @@
         </div>
     </section>
 
+    <!-- result section -->
     <section id="sec2" class="bg-image">
+
+        <div id="loading">
+            <div class="mdl-spinner mdl-js-spinner is-active"></div>
+        </div>
+
+        <div id="result">
+
+        </div>
+
     </section>
 
-    <section id="sec3" class="bg-image">
-    </section>
-
-    <section id="sec4" class="bg-image">
-    </section>
 
     <div id="nav">
-        <a class=scroll href="#sec1">#Input</a>
-        <a class=scroll href="#sec2">#Detection</a>
-        <a class=scroll href="#sec3">#Prediction</a>
-        <a class=scroll href="#sec4">#Result</a>
+        <a id="a1" class=scroll href="#sec1">#Input</a>
+        <a id="a2" class=scroll href="#sec2">#Result</a>
     </div>
 
 </body>
