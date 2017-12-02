@@ -20,8 +20,17 @@ var signals = {
 
 var section1 = {
     'init': () => {
-        $('#submit').click(function () {
+        $('#submit').click(() => {
             signals['input.submit'].trigger();
+        });
+        signals['input.submit'].register(section1.onSubmit);
+    },
+    'onSubmit': () => {
+        var data = {
+            'url': $('#input_input').val()
+        };
+        $.post('./data', data, () => {
+            signals['video.complete'].trigger();
         });
     },
 };
