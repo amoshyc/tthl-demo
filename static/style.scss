@@ -20,7 +20,7 @@ body {
 }
 
 #sec1 {
-    background-color: #444;
+    background-color: #555;
     background-image: url('bg.jpg');
 }
 
@@ -95,6 +95,22 @@ body {
 #result {
     margin: auto;
     // display: none;
+    display: flex;
+
+    div {
+        display: flex;
+        flex-direction: column;
+
+        p {
+            font-size: 20px;
+            color: #404040;
+            margin: 10px auto;
+        }
+    }
+
+    div + div {
+        margin-left: 20px;
+    }
 }
 
 #nav {
