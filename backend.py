@@ -96,7 +96,7 @@ class Video(object):
 
         return ss, ee
 
-    def __concat_video(self, ss, ee):
+    def __concat_segments(self, ss, ee):
         # Command for concat 2 segments
         # ffmpeg -i video.mp4 -filter_complex "\
         # [0:v]trim=1:10,setpts=PTS-STARTPTS[v0]; \
@@ -143,8 +143,11 @@ class Video(object):
         print('*' * 50)
         print('Generating Highlight')
         print('*' * 50)
-        self.__concat_video(ss, ee)
+        self.__concat_segments(ss, ee)
 
+        print('*' * 50)
+        print('Finished')
+        print('*' * 50)
 
 if __name__ == '__main__':
     # Video().highlight(

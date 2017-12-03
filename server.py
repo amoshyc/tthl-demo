@@ -12,7 +12,7 @@ class IndexHandler(tornado.web.RequestHandler):
 class DataHandler(tornado.web.RequestHandler):
     def post(self):
         url = self.get_argument('url')
-        backend.process(url)
+        backend.Video().highlight(url)
         self.write('ok')
 
 
@@ -23,7 +23,6 @@ if __name__ == '__main__':
         (r'/static/(.*)', tornado.web.StaticFileHandler, { 'path': './static' }),
     ] # yapf: disable
 
-    app = tornado.web.Application(route, debug=True)
-
+    app = tornado.web.Application(route)
     app.listen(8080)
     tornado.ioloop.IOLoop.current().start()

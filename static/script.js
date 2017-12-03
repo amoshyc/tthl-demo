@@ -57,7 +57,7 @@ var navigation = {
     'onSubmit': () => {
         document.getElementById('a2').click();
     },
-}
+};
 
 $(function () {
     section1.init();
