@@ -14,8 +14,8 @@ var Signal = () => {
 };
 
 var signals = {
-    'input.submit': Signal(),
-    'video.complete': Signal(),
+    'input.submit': Signal(), // When send button is clicked
+    'video.complete': Signal(), // When highlight is generated
 };
 
 var section1 = {
@@ -55,6 +55,7 @@ var navigation = {
         signals['input.submit'].register(navigation.onSubmit);
     },
     'onSubmit': () => {
+        // To trigger smooth scroll, don't use $('#a2').click()
         document.getElementById('a2').click();
     },
 };
