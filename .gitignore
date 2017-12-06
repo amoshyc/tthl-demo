@@ -102,5 +102,7 @@ ENV/
 
 # this repo
 *.mp4
-frames/
 models/
+result/
+object_detection/
+ssd_mobilenet*

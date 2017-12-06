@@ -6,13 +6,13 @@ import youtube_dl
 import numpy as np
 from PIL import Image
 import tensorflow as tf
-
+import detection
 
 class Video(object):
     def __init__(self,
-                 output_path='./static/hl.mp4',
-                 video_path='./static/v30.mp4',
-                 frame_dir='./static/frames/',
+                 output_path='./result/hl.mp4',
+                 video_path='./result/v30.mp4',
+                 frame_dir='./result/frames/',
                  start_time='00:00:11',
                  duration='00:00:30',
                  fps=1):
@@ -54,8 +54,8 @@ class Video(object):
         print(cmd)
         subprocess.run(cmd, shell=True)
 
-    def __load_frames(self):
-        img_paths = list(self.frame_dir.iterdir())
+    def __load_frames(self, folder):
+        img_paths = sorted(list(folder.glob('*.jpg')))
         xs = np.zeros((len(img_paths), 224, 224, 3), dtype=np.float32)
         for i, img_path in enumerate(img_paths):
             img = Image.open(img_path)
@@ -63,12 +63,12 @@ class Video(object):
             xs[i] = np.array(img)
         return xs
 
-    def __predict(self, xs):
+    def __predict(self, xs, p1, p2):
         n_samples = xs.shape[0]
-        model = tf.keras.models.load_model('models/vgg16_0.847_09.h5')
-        pred = model.predict(xs, batch_size=15, verbose=1).flatten()
+        model = tf.keras.models.load_model('models/players_vgg19_0.876_23.h5')
+        pred = model.predict([xs, p1, p2], batch_size=15, verbose=1).flatten()
         print(pred)
-        pred = np.round(pred).astype(np.uint8)
+        pred = (pred > 0.3).astype(np.uint8)
         print(pred)
 
         for itv in range(2, 6):
@@ -94,7 +94,7 @@ class Video(object):
             if t >= n_samples:
                 break
 
-        return ss, ee
+        return pred, ss, ee
 
     def __concat_segments(self, ss, ee):
         # Command for concat 2 segments
@@ -120,34 +120,26 @@ class Video(object):
         subprocess.run(cmd, shell=True)
 
     def highlight(self, url):
-        print('*' * 50)
-        print('Getting Input')
-        print('*' * 50)
+        print('#', 'Getting Input')
         self.__get_input(url)
 
-        print('*' * 50)
-        print('Writing Frames')
-        print('*' * 50)
+        print('#', 'Writing Frames')
         self.__gen_video()
 
-        print('*' * 50)
-        print('Loading Frames')
-        print('*' * 50)
-        xs = self.__load_frames()
+        print('#', 'Loading Frames')
+        xs = self.__load_frames(self.frame_dir)
 
-        print('*' * 50)
-        print('Predicting')
-        print('*' * 50)
-        ss, ee = self.__predict(xs)
+        print('#', 'Finding Players')
+        p1, p2 = detection.find_players(xs)
 
-        print('*' * 50)
-        print('Generating Highlight')
-        print('*' * 50)
+        print('#', 'Predicting')
+        pred, ss, ee = self.__predict(xs, p1, p2)
+
+        print('#', 'Generating Highlight')
         self.__concat_segments(ss, ee)
 
-        print('*' * 50)
-        print('Finished')
-        print('*' * 50)
+        print('#', 'Finished')
+        return pred.tolist()
 
 if __name__ == '__main__':
     # Video().highlight(
