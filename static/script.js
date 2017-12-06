@@ -1,3 +1,9 @@
+function pad(n, width, z) {
+    z = z || '0';
+    n = n + '';
+    return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+}
+
 var Signal = () => {
     var obj = {
         'slots': [],
@@ -23,9 +29,14 @@ var section1 = {
         $('#submit').click(() => {
             signals['input.submit'].trigger();
         });
-        signals['input.submit'].register(section1.onSubmit);
+        $('#input input').keyup((e) => {
+            if (e.keyCode == 13) {
+                signals['input.submit'].trigger();
+            }
+        });
+        signals['input.submit'].register(section1.submit);
     },
-    'onSubmit': () => {
+    'submit': () => {
         var data = {
             'url': $('#input_input').val()
         };
@@ -39,6 +50,8 @@ var section2 = {
     'init': () => {
         signals['input.submit'].register(section2.onSubmit);
         signals['video.complete'].register(section2.onComplete);
+        $('#loading').hide();
+        $('result').hide()
     },
     'onSubmit': () => {
         $('#loading').show();
@@ -47,6 +60,9 @@ var section2 = {
     'onComplete': (data) => {
         $('#loading').hide();
         $('#result').show();
+
+        $('#v30 video').attr('src', 'result/v30.mp4');
+        $('#hl video').attr('src', 'result/hl.mp4');
     },
 };
 
@@ -54,11 +70,13 @@ var section3 = {
     'init': () => {
         signals['input.submit'].register(section3.onSubmit);
         signals['video.complete'].register(section3.onComplete);
+        $('#images').hide();
     },
     'onSubmit': () => {
         $('#images').hide();
         for (var i = 0; i < 30; i++) {
-            var elem = $('#images:nth-child(' + (i + 1) + ')');
+            var elem = $('#images > img').eq(i);
+            elem.attr('src', '');
             elem.removeClass('pred-true');
         }
     },
@@ -66,6 +84,7 @@ var section3 = {
         var pred = data['pred'];
         for (var i in pred) {
             var elem = $('#images > img').eq(i);
+            elem.attr('src', 'result/players/' + pad(i, 2) + '.jpg');
             if (pred[i]) {
                 elem.addClass('pred-true');
             }

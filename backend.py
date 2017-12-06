@@ -30,7 +30,7 @@ class Video(object):
             self.input_path = pathlib.Path('./raw.mp4')
             if self.input_path.exists():
                 self.input_path.unlink()
-            cmd = f'youtube-dl -f "best[height<=360]" --no-playlist -o "{self.input_path}" "{url}"'
+            cmd = f'youtube-dl -f "best[height<=240]" --no-playlist -o "{self.input_path}" "{url}"'
             subprocess.check_output(cmd, shell=True)
         else:
             self.input_path = pathlib.Path(url)
@@ -65,7 +65,7 @@ class Video(object):
 
     def __predict(self, xs, p1, p2):
         n_samples = xs.shape[0]
-        model = tf.keras.models.load_model('models/players_vgg19_0.876_23.h5')
+        model = tf.keras.models.load_model('models/players_vgg19_0.876_23.h5', compile=False)
         pred = model.predict([xs, p1, p2], batch_size=15, verbose=1).flatten()
         print(pred)
         pred = (pred > 0.3).astype(np.uint8)

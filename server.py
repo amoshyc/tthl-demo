@@ -12,20 +12,26 @@ class IndexHandler(tornado.web.RequestHandler):
 class DataHandler(tornado.web.RequestHandler):
     def post(self):
         url = self.get_argument('url')
-        pred = backend.Video().highlight(url)
-
+        video = backend.Video()
+        pred = video.highlight(url)
         data = {
             'pred': pred,
         }
         self.write(data)
-        
+        del video
+
+class ResultFileHandler(tornado.web.StaticFileHandler):
+    def set_extra_headers(self, path):
+        # Disable cache
+        self.set_header('Cache-Control',
+                        'no-store, no-cache, must-revalidate, max-age=0')
 
 if __name__ == '__main__':
     route = [
         (r'/', IndexHandler),
         (r'/data', DataHandler),
+        (r'/result/(.*)', ResultFileHandler, { 'path': './result' }),
         (r'/static/(.*)', tornado.web.StaticFileHandler, { 'path': './static' }),
-        (r'/result/(.*)', tornado.web.StaticFileHandler, { 'path': './result' }),
     ] # yapf: disable
 
     app = tornado.web.Application(route)
