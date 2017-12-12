@@ -42,7 +42,7 @@ def draw_bbox(x, bbox):
     x2 = ceil(224 * bbox[3])
     yy, cc = draw.polygon_perimeter(
         [y1, y1, y2, y2], [x1, x2, x2, x1], shape=x.shape, clip=True)
-    x[yy, cc, :] = (255, 0, 0)
+    x[yy, cc, :] = (255, 165, 0)
 
 
 def get_graph():
