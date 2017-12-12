@@ -14,7 +14,7 @@ class Video(object):
                  video_path='./result/v30.mp4',
                  frame_dir='./result/frames/',
                  start_time='00:00:11',
-                 duration='00:00:30',
+                 duration='00:01:00',
                  fps=1):
         self.input_path = None
         self.video_path = pathlib.Path(video_path)
