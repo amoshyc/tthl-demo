@@ -1,16 +1,28 @@
 # Demo
 
-## Reqirements
+## Requirements
+
+在 `python 3.6` 下執行。
 
 1. `ffmpeg`
-2. `python 3.6`
-3. `tensorflow`
-4. `youtube-dl`
-5. `pillow`
-6. `numpy`
-7. `tornado`
-8. [tensorflow object detection model (ssd_mobilenet_v1)](https://github.com/tensorflow/models/tree/master/research/object_detection)
-9. weights of the model (played it under `models/`)
+2. `tensorflow`
+3. `youtube-dl`
+4. `pillow`
+5. `numpy`
+6. `tornado`
+
+Except `ffmpeg`, others can be installed by
+
+(Recommended executed in a virtual environment)
+
+```
+pip install -r requirements.txt
+```
+
+## Model Weights
+
+1. [tensorflow object detection model (ssd_mobilenet_v1)](https://github.com/tensorflow/models/tree/master/research/object_detection)
+2. weights of the model (played it under `models/`)
 
 ## Execution
 
